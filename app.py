@@ -1,7 +1,10 @@
 from flask import Flask, render_template, request, jsonify
+from flask_sqlalchemy import SQLAlchemy
 import pandas as pd
+from sqlalchemy import text 
 
 app = Flask(__name__)
+
 
 # 加载数据
 data_path = 'reptile/fooddata.csv'
@@ -41,6 +44,29 @@ def worst_merchants():
 @app.route('/analysis')
 def analysis():
     return render_template('analysis.html')
+
+
+# MySQL所在主机名
+HOSTNAME = "127.0.0.1"
+# MySQL监听的端口号，默认3306
+PORT = 3307
+# 连接MySQL的用户名，自己设置
+USERNAME = "root"
+# 连接MySQL的密码，自己设置
+PASSWORD = "123456"
+# MySQL上创建的数据库名称
+DATABASE = "foodanalysis"
+# 通过修改以下代码来操作不同的SQL比写原生SQL简单很多 --》通过ORM可以实现从底层更改使用的SQL
+app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql+pymysql://{USERNAME}:{PASSWORD}@{HOSTNAME}:{PORT}/{DATABASE}?charset=utf8mb4"
+
+db = SQLAlchemy(app)
+
+# 测试是否连接成功
+with app.app_context():
+    with db.engine.connect() as conn:
+        rs = conn.execute(text("select 1"))
+        print(rs.fetchone())  # (1,)
+
 
 # 启动服务器
 if __name__ == '__main__':
