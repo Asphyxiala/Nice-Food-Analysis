@@ -2,72 +2,97 @@ from flask import Flask, render_template, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 import pandas as pd
 from sqlalchemy import text 
+# 导入config包中导入config文件中对数据库进行的配置
+from config import MYSQL_HOST,MYSQL_PORT,MYSQL_USER,MYSQL_PASSWD,MYSQL_DB
 
 app = Flask(__name__)
 
 
-# 加载数据
-data_path = 'reptile/fooddata.csv'
-df = pd.read_csv(data_path)
+# 配置数据库连接
+app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql+pymysql://{MYSQL_USER}:{MYSQL_PASSWD}@{MYSQL_HOST}:{MYSQL_PORT}/{MYSQL_DB}?charset=utf8mb4"
+
+db = SQLAlchemy(app)
+
+# 定义数据模型
+class FoodData(db.Model):
+    __tablename__ = 'fooddata'
+    店名 = db.Column(db.String(255), primary_key=True,nullable=True)
+    评论 = db.Column(db.String(255), nullable=True)
+    人均消费 = db.Column(db.String(255), nullable=True)
+    口味 = db.Column(db.String(255), nullable=True)
+    环境 = db.Column(db.String(255), nullable=True)
+    服务 = db.Column(db.String(255), nullable=True)
+    电话 = db.Column(db.String(255), nullable=True)
+    地址 = db.Column(db.String(255), nullable=True)
+    详情页 = db.Column(db.String(255), nullable=True)
 
 @app.route('/')
 def index():
     return render_template('index.html')
 
-@app.route('/data_overview')
-def data_overview():
-    total_reviews = df['评论'].sum()
-    total_merchants = df['店名'].nunique()
-    return render_template('data_overview.html', total_reviews=total_reviews, total_merchants=total_merchants)
+@app.route('/fooddata', methods=['GET'])
+def get_fooddata():
+    data = FoodData.query.all()
+    result = []
+    for item in data:
+        result.append({
+            '店名': item.店名,
+            '评论': item.评论,
+            '人均消费': item.人均消费,
+            '口味': item.口味,
+            '环境': item.环境,
+            '服务': item.服务,
+            '电话': item.电话,
+            '地址': item.地址,
+            '详情页': item.详情页
+        })
+    return jsonify(result)
 
-@app.route('/top_merchants')
-def top_merchants():
-    top_10_merchants = df.sort_values(by='评论', ascending=False).head(10)
-    return render_template('top_merchants.html', top_10_merchants=top_10_merchants)
+@app.route('/fooddata', methods=['POST'])
+def add_fooddata():
+    data = request.get_json()
+    new_fooddata = FoodData(
+        店名=data.get('店名'),
+        评论=data.get('评论'),
+        人均消费=data.get('人均消费'),
+        口味=data.get('口味'),
+        环境=data.get('环境'),
+        服务=data.get('服务'),
+        电话=data.get('电话'),
+        地址=data.get('地址'),
+        详情页=data.get('详情页')
+    )
+    db.session.add(new_fooddata)
+    db.session.commit()
+    return jsonify({'message': 'Data added successfully!'})
 
-@app.route('/lowest_spending_merchant')
-def lowest_spending_merchant():
-    merchant = df[df['评论'] == df['评论'].max()].sort_values(by='人均消费').iloc[0]
-    return render_template('lowest_spending_merchant.html', merchant=merchant)
+@app.route('/fooddata', methods=['PUT'])
+def update_fooddata(店名):
+    data = request.get_json()
+    fooddata = FoodData.query.filter_by(店名=店名).first()
+    if fooddata:
+        fooddata.评论 = data.get('评论', fooddata.评论)
+        fooddata.人均消费 = data.get('人均消费', fooddata.人均消费)
+        fooddata.口味 = data.get('口味', fooddata.口味)
+        fooddata.环境 = data.get('环境', fooddata.环境)
+        fooddata.服务 = data.get('服务', fooddata.服务)
+        fooddata.电话 = data.get('电话', fooddata.电话)
+        fooddata.地址 = data.get('地址', fooddata.地址)
+        fooddata.详情页 = data.get('详情页', fooddata.详情页)
+        db.session.commit()
+        return jsonify({'message': 'Data updated successfully!'})
+    else:
+        return jsonify({'message': 'Data not found!'}), 404
 
-@app.route('/best_merchants')
-def best_merchants():
-    best_environment = df.sort_values(by='环境', ascending=False).head(1)
-    best_service = df.sort_values(by='服务', ascending=False).head(1)
-    return render_template('best_merchants.html', best_environment=best_environment, best_service=best_service)
+@app.route('/fooddata', methods=['DELETE'])
+def delete_fooddata(店名):
+    fooddata = FoodData.query.filter_by(店名=店名).first()
+    if fooddata:
+        db.session.delete(fooddata)
+        db.session.commit()
+        return jsonify({'message': 'Data deleted successfully!'})
+    else:
+        return jsonify({'message': 'Data not found!'}), 404
 
-@app.route('/worst_merchants')
-def worst_merchants():
-    worst_service = df[df['评论'] == df['评论'].max()].sort_values(by='服务').head(3)
-    return render_template('worst_merchants.html', worst_service=worst_service)
-
-@app.route('/analysis')
-def analysis():
-    return render_template('analysis.html')
-
-
-# MySQL所在主机名
-HOSTNAME = "127.0.0.1"
-# MySQL监听的端口号，默认3306
-PORT = 3307
-# 连接MySQL的用户名，自己设置
-USERNAME = "root"
-# 连接MySQL的密码，自己设置
-PASSWORD = "123456"
-# MySQL上创建的数据库名称
-DATABASE = "foodanalysis"
-# 通过修改以下代码来操作不同的SQL比写原生SQL简单很多 --》通过ORM可以实现从底层更改使用的SQL
-app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql+pymysql://{USERNAME}:{PASSWORD}@{HOSTNAME}:{PORT}/{DATABASE}?charset=utf8mb4"
-
-db = SQLAlchemy(app)
-
-# 测试是否连接成功
-with app.app_context():
-    with db.engine.connect() as conn:
-        rs = conn.execute(text("select 1"))
-        print(rs.fetchone())  # (1,)
-
-
-# 启动服务器
 if __name__ == '__main__':
     app.run(debug=True)

@@ -101,14 +101,14 @@ def create_map(data, key):
     city_map.get_root().html.add_child(folium.Element(legend_html))
 
     # 保存地图到文件
-    output_file = 'D:/Git/Nice-Food-Analysis/analysis/popular_merchants_map.html'
+    output_file = 'analysis/popular_merchants_map.html'
     city_map.save(output_file)
     print(f"地图已保存到文件: {output_file}")
 
 
 def main():
     # 加载数据
-    file_path = 'D:/Git/Nice-Food-Analysis/analysis/most_popular.csv'
+    file_path = 'analysis/most_popular.csv'
     data = load_data(file_path, encoding='utf-8')
 
     # 高德地图API Key
