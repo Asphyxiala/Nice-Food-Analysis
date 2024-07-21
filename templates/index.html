@@ -1,25 +1,25 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h2>Food Data</h2>
-    <form action="{{ url_for('search') }}" method="get">
-        <input type="text" name="query" placeholder="Search...">
-        <input type="submit" value="Search">
+    <h2 class="text-center">商家数据</h2>
+    <form class="search-bar clearfix" action="{{ url_for('search') }}" method="get">
+        <input type="text" name="query" placeholder="搜索...">
+        <input type="submit" value="搜索">
     </form>
     <table>
         <thead>
             <tr>
                 <th>ID</th>
-                <th>Name</th>
-                <th>Comments Number</th>
-                <th>Per Capita Consumption</th>
-                <th>Taste</th>
-                <th>Environment</th>
-                <th>Service</th>
-                <th>Phone</th>
-                <th>Address</th>
-                <th>Details</th>
-                <th>Actions</th>
+                <th>名称</th>
+                <th>评论数量</th>
+                <th>人均消费</th>
+                <th>口味</th>
+                <th>环境</th>
+                <th>服务</th>
+                <th>电话</th>
+                <th>地址</th>
+                <th>详情</th>
+                <th>操作</th>
             </tr>
         </thead>
         <tbody>
@@ -36,8 +36,8 @@
                 <td>{{ item.address }}</td>
                 <td>{{ item.details }}</td>
                 <td>
-                    <a href="{{ url_for('edit', mid=item.mid) }}">Edit</a>
-                    <a href="{{ url_for('delete', mid=item.mid) }}">Delete</a>
+                    <a class="btn btn-primary" href="{{ url_for('edit', mid=item.mid) }}">编辑</a>
+                    <a class="btn btn-danger" href="{{ url_for('delete', mid=item.mid) }}">删除</a>
                 </td>
             </tr>
             {% endfor %}
