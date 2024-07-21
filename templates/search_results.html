@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>Search Results</h2>
+    <form action="{{ url_for('search') }}" method="get">
+        <input type="text" name="query" placeholder="Search...">
+        <input type="submit" value="Search">
+    </form>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Comments Number</th>
+                <th>Per Capita Consumption</th>
+                <th>Taste</th>
+                <th>Environment</th>
+                <th>Service</th>
+                <th>Phone</th>
+                <th>Address</th>
+                <th>Details</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in results %}
+            <tr>
+                <td>{{ item.mid }}</td>
+                <td>{{ item.mname }}</td>
+                <td>{{ item.comments_num }}</td>
+                <td>{{ item.per_capita_con }}</td>
+                <td>{{ item.taste }}</td>
+                <td>{{ item.environment }}</td>
+                <td>{{ item.service }}</td>
+                <td>{{ item.phone }}</td>
+                <td>{{ item.address }}</td>
+                <td>{{ item.details }}</td>
+                <td>
+                    <a href="{{ url_for('edit', mid=item.mid) }}">Edit</a>
+                    <a href="{{ url_for('delete', mid=item.mid) }}">Delete</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

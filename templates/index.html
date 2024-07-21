@@ -1,149 +1,46 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Food Data Management</title>
-    <style>
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        th, td {
-            border: 1px solid black;
-            padding: 8px;
-            text-align: left;
-        }
-        th {
-            background-color: #f2f2f2;
-        }
-        form {
-            margin: 20px 0;
-        }
-        label, input {
-            display: block;
-            margin: 5px 0;
-        }
-        input[type="text"], input[type="submit"] {
-            width: 100%;
-        }
-    </style>
-</head>
-<body>
-    <h1>Food Data Management</h1>
-    <table id="fooddata-table">
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>Food Data</h2>
+    <form action="{{ url_for('search') }}" method="get">
+        <input type="text" name="query" placeholder="Search...">
+        <input type="submit" value="Search">
+    </form>
+    <table>
         <thead>
             <tr>
-                <th>店名</th>
-                <th>评论</th>
-                <th>人均消费</th>
-                <th>口味</th>
-                <th>环境</th>
-                <th>服务</th>
-                <th>电话</th>
-                <th>地址</th>
-                <th>详情页</th>
-                <th>操作</th>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Comments Number</th>
+                <th>Per Capita Consumption</th>
+                <th>Taste</th>
+                <th>Environment</th>
+                <th>Service</th>
+                <th>Phone</th>
+                <th>Address</th>
+                <th>Details</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
+            {% for item in results %}
+            <tr>
+                <td>{{ item.mid }}</td>
+                <td>{{ item.mname }}</td>
+                <td>{{ item.comments_num }}</td>
+                <td>{{ item.per_capita_con }}</td>
+                <td>{{ item.taste }}</td>
+                <td>{{ item.environment }}</td>
+                <td>{{ item.service }}</td>
+                <td>{{ item.phone }}</td>
+                <td>{{ item.address }}</td>
+                <td>{{ item.details }}</td>
+                <td>
+                    <a href="{{ url_for('edit', mid=item.mid) }}">Edit</a>
+                    <a href="{{ url_for('delete', mid=item.mid) }}">Delete</a>
+                </td>
+            </tr>
+            {% endfor %}
         </tbody>
     </table>
-
-    <h2>添加/更新数据</h2>
-    <form id="fooddata-form">
-        <label for="店名">店名</label>
-        <input type="text" id="店名" name="店名" required>
-        
-        <label for="评论">评论</label>
-        <input type="text" id="评论" name="评论">
-        
-        <label for="人均消费">人均消费</label>
-        <input type="text" id="人均消费" name="人均消费">
-        
-        <label for="口味">口味</label>
-        <input type="text" id="口味" name="口味">
-        
-        <label for="环境">环境</label>
-        <input type="text" id="环境" name="环境">
-        
-        <label for="服务">服务</label>
-        <input type="text" id="服务" name="服务">
-        
-        <label for="电话">电话</label>
-        <input type="text" id="电话" name="电话">
-        
-        <label for="地址">地址</label>
-        <input type="text" id="地址" name="地址">
-        
-        <label for="详情页">详情页</label>
-        <input type="text" id="详情页" name="详情页">
-        
-        <input type="submit" value="提交">
-    </form>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const form = document.getElementById('fooddata-form');
-            const tableBody = document.getElementById('fooddata-table').getElementsByTagName('tbody')[0];
-
-            function loadFoodData() {
-                fetch('/fooddata')
-                    .then(response => response.json())
-                    .then(data => {
-                        tableBody.innerHTML = '';
-                        data.forEach(item => {
-                            const row = tableBody.insertRow();
-                            row.insertCell().innerText = item.店名;
-                            row.insertCell().innerText = item.评论;
-                            row.insertCell().innerText = item.人均消费;
-                            row.insertCell().innerText = item.口味;
-                            row.insertCell().innerText = item.环境;
-                            row.insertCell().innerText = item.服务;
-                            row.insertCell().innerText = item.电话;
-                            row.insertCell().innerText = item.地址;
-                            row.insertCell().innerText = item.详情页;
-                            const actionsCell = row.insertCell();
-                            const deleteButton = document.createElement('button');
-                            deleteButton.innerText = '删除';
-                            deleteButton.onclick = () => deleteFoodData(item.店名);
-                            actionsCell.appendChild(deleteButton);
-                        });
-                    });
-            }
-
-            function deleteFoodData(店名) {
-                fetch(`/fooddata/${店名}`, {
-                    method: 'DELETE'
-                })
-                .then(response => response.json())
-                .then(() => loadFoodData());
-            }
-
-            form.onsubmit = function (event) {
-                event.preventDefault();
-                const formData = new FormData(form);
-                const jsonData = {};
-                formData.forEach((value, key) => {
-                    jsonData[key] = value;
-                });
-
-                fetch('/fooddata', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(jsonData)
-                })
-                .then(response => response.json())
-                .then(() => {
-                    loadFoodData();
-                    form.reset();
-                });
-            };
-
-            loadFoodData();
-        });
-    </script>
-</body>
-</html>
+{% endblock %}
