@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>评分最差商家</title>
+</head>
+<body>
+    <h1>评分最差商家</h1>
+    <ul>
+        {% for index, row in worst_service.iterrows() %}
+        <li>
+            <p>店名: {{ row['店名'] }}</p>
+            <p>服务评分: {{ row['服务'] }}</p>
+        </li>
+        {% endfor %}
+    </ul>
+    <a href="/">返回首页</a>
+</body>
+</html>
