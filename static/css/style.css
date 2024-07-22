@@ -140,6 +140,10 @@ form input[type="submit"]:hover {
     text-align: center;
 }
 
+.search-result {
+    text-align: center;
+}
+
 .mt-20 {
     margin-top: 20px;
 }

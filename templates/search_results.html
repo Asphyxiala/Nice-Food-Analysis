@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h2>Search Results</h2>
+    <h2 class="search-result">搜索结果</h2>
     <form class="search-bar clearfix" action="{{ url_for('search') }}" method="get">
         <input type="text" name="query" placeholder="搜索...">
         <input type="submit" value="搜索">
